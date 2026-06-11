@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>gh-view</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="styles.css" />
+    <!-- The favicon (eye + open-PR count) and tab title are set by Elm at runtime. -->
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="elm.js"></script>
+    <script>
+      "use strict";
+
+      const TOKEN_KEY = "gh-view:token";
+      const PRS_KEY = "gh-view:prs";
+
+      function readJson(key, fallback) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw === null ? fallback : JSON.parse(raw);
+        } catch (e) {
+          return fallback;
+        }
+      }
+
+      // Flags carry the persisted state synchronously at startup, so the app
+      // renders frozen (closed/merged) snapshots immediately, before any fetch.
+      const flags = {
+        token: localStorage.getItem(TOKEN_KEY) || "",
+        prs: readJson(PRS_KEY, []),
+        now: Date.now(),
+      };
+
+      const app = Elm.Main.init({
+        node: document.getElementById("app"),
+        flags: flags,
+      });
+
+      app.ports.storeToken.subscribe(function (token) {
+        if (token) {
+          localStorage.setItem(TOKEN_KEY, token);
+        } else {
+          localStorage.removeItem(TOKEN_KEY);
+        }
+      });
+
+      app.ports.storePrs.subscribe(function (prs) {
+        localStorage.setItem(PRS_KEY, JSON.stringify(prs));
+      });
+
+      app.ports.setFavicon.subscribe(function (href) {
+        let link = document.querySelector("link[rel='icon']");
+        if (!link) {
+          link = document.createElement("link");
+          link.rel = "icon";
+          document.head.appendChild(link);
+        }
+        link.href = href;
+      });
+
+      app.ports.setTitle.subscribe(function (titleText) {
+        document.title = titleText;
+      });
+    </script>
+  </body>
+</html>

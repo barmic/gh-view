@@ -1,0 +1,14 @@
+{
+  "name": "gh-view",
+  "version": "0.1.0",
+  "description": "Front-only web UI to watch GitHub pull requests",
+  "private": true,
+  "scripts": {
+    "dev": "elm-live src/Main.elm --open --pushstate -- --output=elm.js --debug",
+    "build": "elm make src/Main.elm --optimize --output=elm.js"
+  },
+  "devDependencies": {
+    "elm": "0.19.1-6",
+    "elm-live": "4.0.2"
+  }
+}
