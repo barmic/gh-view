@@ -7,7 +7,7 @@ requests GitHub choisies à la main.
 
 ```sh
 npm install
-npm run dev      # elm-live, ouvre http://localhost:8000
+npm run dev      # elm-live, ouvre sur http://localhost:8000
 ```
 
 Build de production :
