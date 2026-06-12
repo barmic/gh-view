@@ -1,5 +1,6 @@
 module View exposing (view)
 
+import Ci
 import Duration
 import Html exposing (Attribute, Html, a, button, div, h1, header, img, input, span, text)
 import Html.Attributes exposing (alt, class, classList, disabled, href, placeholder, src, target, title, type_, value)
@@ -197,10 +198,11 @@ viewLoaded classes now item d =
                 ]
             ]
         , div [ class "card-badges" ]
-            [ reviewBadge d.reviewDecision
-            , commentsBadge d.unresolvedCount
-            , mergeableBadge d.mergeable
-            ]
+            (reviewBadge d.reviewDecision
+                :: commentsBadge d.unresolvedCount
+                :: mergeableBadge d.mergeable
+                :: ciBadges d
+            )
         , div [ class "card-meta" ]
             [ span [ class "meta", title "Depuis la création" ] [ text ("créée " ++ Duration.relative now d.createdAt) ]
             , span [ class "meta", title "Depuis la dernière mise à jour" ] [ text ("maj " ++ Duration.relative now d.updatedAt) ]
@@ -304,6 +306,69 @@ mergeableBadge m =
 
         UnknownMergeable ->
             span [ class "badge badge-neutral" ] [ text "Mergeable ?" ]
+
+
+{-| CI badges (GitHub Actions, then CircleCI). Only for open PRs — a finished
+PR's CI is irrelevant and not persisted. A provider with no checks (`Unknown`)
+renders nothing.
+-}
+ciBadges : PrData -> List (Html Msg)
+ciBadges d =
+    if d.state == StOpen then
+        [ ciBadge "GHA" d.ci.gha, ciBadge "CircleCI" d.ci.circle ]
+
+    else
+        []
+
+
+ciBadge : String -> Ci.ProviderCi -> Html Msg
+ciBadge label provider =
+    case provider.state of
+        Ci.Unknown ->
+            text ""
+
+        _ ->
+            let
+                content =
+                    [ text (ciLabel label provider.state) ]
+            in
+            case provider.url of
+                Just url ->
+                    a
+                        [ href url
+                        , target "_blank"
+                        , class ("badge badge-link " ++ ciClass provider.state)
+                        ]
+                        content
+
+                Nothing ->
+                    span [ class ("badge " ++ ciClass provider.state) ] content
+
+
+ciClass : Ci.CiState -> String
+ciClass state =
+    case state of
+        Ci.Succeed ->
+            "badge-ok"
+
+        Ci.Failed ->
+            "badge-warn"
+
+        _ ->
+            "badge-neutral"
+
+
+ciLabel : String -> Ci.CiState -> String
+ciLabel label state =
+    case state of
+        Ci.Succeed ->
+            "✓ " ++ label
+
+        Ci.Failed ->
+            "✗ " ++ label
+
+        _ ->
+            label ++ "…"
 
 
 

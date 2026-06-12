@@ -308,6 +308,15 @@ body {
   color: var(--neutral-fg);
 }
 
+.badge-link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.badge-link:hover {
+  filter: brightness(0.95);
+}
+
 .badge-open {
   background: var(--ok-bg);
   color: var(--ok-fg);
