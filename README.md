@@ -34,6 +34,13 @@ conflits / inconnu), durées relatives depuis création et dernière mise à jou
 (rafraîchies chaque minute côté client), branche source (et destination si elle
 n'est ni `main` ni `master`), auteur, état OPEN/MERGED/CLOSED.
 
+**État CI** (PR ouvertes uniquement) : deux badges agrégés dérivés du
+`statusCheckRollup` GitHub du dernier commit — **GHA** (GitHub Actions) et
+**CircleCI** — chacun `✓` (succeed), `✗` (failed) ou `…` (en cours), masqué si
+le fournisseur n'a aucun check. Les badges sont cliquables (GHA → onglet
+Actions, CircleCI → pipeline). Les autres checks (SonarCloud, Codecov…) sont
+ignorés. La CI n'est pas persistée : elle est refetchée au Rafraîchir.
+
 Tri : PR ouvertes par date de mise à jour décroissante, puis mergées/fermées en
 bas.
 
@@ -48,5 +55,7 @@ bas.
 
 - `reviewThreads(first: 100)` : les PR avec plus de 100 fils de commentaires ne
   comptent que les 100 premiers (pas de pagination).
+- `statusCheckRollup … contexts(first: 100)` : au-delà de 100 checks sur le
+  commit de tête, les suivants ne sont pas pris en compte dans l'agrégation CI.
 - Toutes les erreurs (token, 404, rate limit, réseau) sont affichées dans une
   bannière globale unique.
