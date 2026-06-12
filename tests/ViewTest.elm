@@ -1,0 +1,72 @@
+module ViewTest exposing (suite)
+
+import Ci
+import Expect
+import Test exposing (Test, describe, test)
+import Test.Html.Query as Query
+import Test.Html.Selector as Selector
+import Time
+import Types exposing (Mergeable(..), PrData, PrState(..), ReviewDecision(..))
+import View
+
+
+basePr : PrData
+basePr =
+    { id = { owner = "o", repo = "r", number = 1 }
+    , title = "Some PR"
+    , url = "https://example.com"
+    , author = { login = "me", avatarUrl = "" }
+    , headRef = "feature"
+    , baseRef = "main"
+    , reviewDecision = Approved
+    , unresolvedCount = 0
+    , mergeable = Mergeable
+    , state = StOpen
+    , createdAt = Time.millisToPosix 0
+    , updatedAt = Time.millisToPosix 0
+    , ci = Ci.unknownStatus
+    }
+
+
+withGha : Ci.CiState -> PrData -> PrData
+withGha state pr =
+    { pr | ci = { gha = { state = state, url = Nothing }, circle = { state = Ci.Unknown, url = Nothing } } }
+
+
+suite : Test
+suite =
+    describe "View.viewBadges"
+        [ test "status badges sit on a first row" <|
+            \_ ->
+                View.viewBadges basePr
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.class "badge-row" ]
+        , test "no CI row when both providers are Unknown (collapse)" <|
+            \_ ->
+                View.viewBadges basePr
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.class "badge-row-ci" ]
+                    |> Query.count (Expect.equal 0)
+        , test "a CI row appears when a provider reports a state" <|
+            \_ ->
+                basePr
+                    |> withGha Ci.Succeed
+                    |> View.viewBadges
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.class "badge-row-ci" ]
+        , test "the reporting provider's badge is rendered" <|
+            \_ ->
+                basePr
+                    |> withGha Ci.Succeed
+                    |> View.viewBadges
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.text "✓ GHA" ]
+        , test "finished PRs never show a CI row" <|
+            \_ ->
+                { basePr | state = StMerged }
+                    |> withGha Ci.Succeed
+                    |> View.viewBadges
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.class "badge-row-ci" ]
+                    |> Query.count (Expect.equal 0)
+        ]

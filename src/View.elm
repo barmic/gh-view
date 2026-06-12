@@ -1,4 +1,4 @@
-module View exposing (view)
+module View exposing (view, viewBadges)
 
 import Ci
 import Duration
@@ -179,7 +179,8 @@ viewPending classes item =
                     )
                 ]
             ]
-        , div [ class "card-actions" ] [ removeButton item.id ]
+        , div [ class "card-right" ]
+            [ div [ class "card-actions" ] [ removeButton item.id ] ]
         ]
 
 
@@ -197,23 +198,20 @@ viewLoaded classes now item d =
                 , viewAuthor d.author
                 ]
             ]
-        , div [ class "card-badges" ]
-            (reviewBadge d.reviewDecision
-                :: commentsBadge d.unresolvedCount
-                :: mergeableBadge d.mergeable
-                :: ciBadges d
-            )
-        , div [ class "card-meta" ]
-            [ span [ class "meta", title "Depuis la création" ] [ text ("créée " ++ Duration.relative now d.createdAt) ]
-            , span [ class "meta", title "Depuis la dernière mise à jour" ] [ text ("maj " ++ Duration.relative now d.updatedAt) ]
-            ]
-        , div [ class "card-actions" ]
-            [ if item.fetching then
-                span [ class "spinner", title "Rafraîchissement…" ] []
+        , viewBadges d
+        , div [ class "card-right" ]
+            [ div [ class "card-meta" ]
+                [ span [ class "meta", title "Depuis la création" ] [ text ("créée " ++ Duration.relative now d.createdAt) ]
+                , span [ class "meta", title "Depuis la dernière mise à jour" ] [ text ("maj " ++ Duration.relative now d.updatedAt) ]
+                ]
+            , div [ class "card-actions" ]
+                [ if item.fetching then
+                    span [ class "spinner", title "Rafraîchissement…" ] []
 
-              else
-                text ""
-            , removeButton d.id
+                  else
+                    text ""
+                , removeButton d.id
+                ]
             ]
         ]
 
@@ -255,6 +253,28 @@ removeButton id =
 
 
 -- BADGES
+
+
+{-| The card's badge cluster: a first row with the review/comments/mergeable
+status badges, and a second CI row (GitHub Actions, CircleCI). The CI row is
+omitted entirely when no provider reports a state, so the card stays compact.
+-}
+viewBadges : PrData -> Html Msg
+viewBadges d =
+    div [ class "card-badges" ]
+        (div [ class "badge-row" ]
+            [ reviewBadge d.reviewDecision
+            , commentsBadge d.unresolvedCount
+            , mergeableBadge d.mergeable
+            ]
+            :: (case ciBadges d of
+                    [] ->
+                        []
+
+                    badges ->
+                        [ div [ class "badge-row badge-row-ci" ] badges ]
+               )
+        )
 
 
 stateBadge : PrState -> Html Msg
@@ -310,39 +330,43 @@ mergeableBadge m =
 
 {-| CI badges (GitHub Actions, then CircleCI). Only for open PRs — a finished
 PR's CI is irrelevant and not persisted. A provider with no checks (`Unknown`)
-renders nothing.
+contributes nothing, so an open PR without any CI yields an empty list and the
+CI row collapses.
 -}
 ciBadges : PrData -> List (Html Msg)
 ciBadges d =
     if d.state == StOpen then
-        [ ciBadge "GHA" d.ci.gha, ciBadge "CircleCI" d.ci.circle ]
+        List.filterMap identity
+            [ ciBadge "GHA" d.ci.gha, ciBadge "CircleCI" d.ci.circle ]
 
     else
         []
 
 
-ciBadge : String -> Ci.ProviderCi -> Html Msg
+ciBadge : String -> Ci.ProviderCi -> Maybe (Html Msg)
 ciBadge label provider =
     case provider.state of
         Ci.Unknown ->
-            text ""
+            Nothing
 
         _ ->
             let
                 content =
                     [ text (ciLabel label provider.state) ]
             in
-            case provider.url of
-                Just url ->
-                    a
-                        [ href url
-                        , target "_blank"
-                        , class ("badge badge-link " ++ ciClass provider.state)
-                        ]
-                        content
+            Just
+                (case provider.url of
+                    Just url ->
+                        a
+                            [ href url
+                            , target "_blank"
+                            , class ("badge badge-link " ++ ciClass provider.state)
+                            ]
+                            content
 
-                Nothing ->
-                    span [ class ("badge " ++ ciClass provider.state) ] content
+                    Nothing ->
+                        span [ class ("badge " ++ ciClass provider.state) ] content
+                )
 
 
 ciClass : Ci.CiState -> String
