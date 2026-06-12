@@ -5,6 +5,7 @@ finished PRs store a frozen snapshot. Decoding is lenient: a malformed entry
 is dropped rather than wiping the whole list.
 -}
 
+import Ci
 import Codec
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -79,3 +80,4 @@ frozenDataDecoder =
     Codec.prDataDecoder
         (Decode.field "id" Codec.prIdDecoder)
         (Decode.field "unresolvedCount" Decode.int)
+        (Decode.succeed Ci.unknownStatus)

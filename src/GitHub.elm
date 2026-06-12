@@ -4,6 +4,7 @@ module GitHub exposing (fetchPr)
 (CORS is allowed with an Authorization header), so no backend is needed.
 -}
 
+import Ci
 import Codec
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -34,6 +35,13 @@ query =
           baseRefName
           author { login avatarUrl }
           reviewThreads(first:100){ nodes { isResolved isOutdated } }
+          commits(last:1){ nodes { commit { statusCheckRollup {
+            contexts(first:100){ nodes {
+              __typename
+              ... on CheckRun { conclusion status detailsUrl checkSuite { app { slug } } }
+              ... on StatusContext { context state targetUrl }
+            } }
+          } } } }
         }
       }
     }
@@ -131,7 +139,54 @@ errorsDecoder =
 
 prDataDecoder : Decoder PrData
 prDataDecoder =
-    Codec.prDataDecoder idFromVariables unresolvedCountDecoder
+    Codec.prDataDecoder idFromVariables unresolvedCountDecoder ciDecoder
+
+
+{-| Derive the CI status from the head commit's `statusCheckRollup`. Every step
+is tolerant: a missing/null rollup, no commit, or no contexts all collapse to
+an empty list, i.e. an `unknown` status for both providers.
+-}
+ciDecoder : Decoder Ci.CiStatus
+ciDecoder =
+    Decode.oneOf
+        [ Decode.at [ "commits", "nodes" ]
+            (Decode.index 0
+                (Decode.at [ "commit", "statusCheckRollup", "contexts", "nodes" ]
+                    (Decode.list rawNodeDecoder)
+                )
+            )
+        , Decode.succeed []
+        ]
+        |> Decode.map Ci.fromNodes
+
+
+{-| Decode one rollup context into a `Ci.RawNode`. Every field but the
+discriminating `__typename` is optional, so a node never fails to decode
+whichever of the `CheckRun`/`StatusContext` shapes it actually is.
+-}
+rawNodeDecoder : Decoder Ci.RawNode
+rawNodeDecoder =
+    Decode.map7 Ci.RawNode
+        (Decode.field "__typename" Decode.string)
+        (Decode.maybe (Decode.at [ "checkSuite", "app", "slug" ] Decode.string))
+        (Decode.maybe (Decode.field "conclusion" Decode.string))
+        (Decode.maybe (Decode.field "status" Decode.string))
+        (Decode.maybe (Decode.field "context" Decode.string))
+        (Decode.maybe (Decode.field "state" Decode.string))
+        contextUrlDecoder
+
+
+{-| A `CheckRun` carries a `detailsUrl` (GitHub Actions run); a `StatusContext`
+carries a possibly-null `targetUrl` (CircleCI pipeline). We keep whichever is
+present as a single link.
+-}
+contextUrlDecoder : Decoder (Maybe String)
+contextUrlDecoder =
+    Decode.oneOf
+        [ Decode.field "detailsUrl" Decode.string |> Decode.map Just
+        , Decode.field "targetUrl" (Decode.nullable Decode.string)
+        , Decode.succeed Nothing
+        ]
 
 
 {-| The response object doesn't echo owner/repo/number, so we recover the id

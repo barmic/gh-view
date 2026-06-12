@@ -11,6 +11,7 @@ module Types exposing
     , sameId
     )
 
+import Ci
 import Time
 
 
@@ -68,6 +69,7 @@ type alias PrData =
     , state : PrState
     , createdAt : Time.Posix
     , updatedAt : Time.Posix
+    , ci : Ci.CiStatus
     }
 
 

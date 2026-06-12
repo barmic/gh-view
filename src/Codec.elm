@@ -13,6 +13,8 @@ The two sources differ in exactly two places, which are passed in:
   - how the `PrId` is obtained (injected for GitHub, read from JSON for storage)
   - how the unresolved-comment count is obtained (computed from
     `reviewThreads` for GitHub, stored as an int for storage)
+  - how the CI status is obtained (derived from `statusCheckRollup` for GitHub,
+    defaulted to `unknown` for storage — CI is intentionally not persisted)
 
 Everything else (enums as GitHub's own string forms, ISO-8601 dates) is
 encoded identically, so a frozen snapshot round-trips through the same field
@@ -20,6 +22,7 @@ names the API uses.
 
 -}
 
+import Ci
 import Iso8601
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -35,8 +38,8 @@ andMap =
 {-| Decode a `PrData`, parameterised over its id source and its
 unresolved-count source. Field order must match the `PrData` constructor.
 -}
-prDataDecoder : Decoder PrId -> Decoder Int -> Decoder PrData
-prDataDecoder idDecoder countDecoder =
+prDataDecoder : Decoder PrId -> Decoder Int -> Decoder Ci.CiStatus -> Decoder PrData
+prDataDecoder idDecoder countDecoder ciDecoder =
     Decode.succeed PrData
         |> andMap idDecoder
         |> andMap (Decode.field "title" Decode.string)
@@ -50,6 +53,7 @@ prDataDecoder idDecoder countDecoder =
         |> andMap stateField
         |> andMap (Decode.field "createdAt" Iso8601.decoder)
         |> andMap (Decode.field "updatedAt" Iso8601.decoder)
+        |> andMap ciDecoder
 
 
 encodePrData : PrData -> Encode.Value
