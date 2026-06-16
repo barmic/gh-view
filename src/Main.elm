@@ -5,6 +5,7 @@ port module Main exposing (main)
 
 import Browser
 import Config
+import Discover
 import Favicon
 import GitHub
 import Json.Decode as Decode
@@ -84,8 +85,10 @@ init flagsValue =
             , repoInput = ""
             , authorInput = ""
             , configOpen = List.isEmpty flags.repos && List.isEmpty flags.authors
+            , discovering = False
             , now = flags.now
             , error = Nothing
+            , notice = Nothing
             , highlight = Nothing
             , lastRefresh =
                 if String.isEmpty flags.token then
@@ -140,7 +143,7 @@ update msg model =
                     ( items, cmd ) =
                         refreshAll model
                 in
-                ( { model | items = items, error = Nothing, lastRefresh = Just model.now }, cmd )
+                ( { model | items = items, error = Nothing, notice = Nothing, lastRefresh = Just model.now }, cmd )
 
         GotPr id result ->
             case result of
@@ -221,6 +224,33 @@ update msg model =
 
         ToggleConfig ->
             ( { model | configOpen = not model.configOpen }, Cmd.none )
+
+        FetchNewClicked ->
+            if String.isEmpty model.token then
+                ( { model | error = Just tokenMissing }, Cmd.none )
+
+            else
+                ( { model | discovering = True, error = Nothing, notice = Nothing }
+                , GitHub.discover model.token GotDiscovered { repos = model.repos, authors = model.authors }
+                )
+
+        GotDiscovered result ->
+            case result of
+                Err message ->
+                    ( { model | discovering = False, error = Just message }, Cmd.none )
+
+                Ok discovery ->
+                    let
+                        items =
+                            Discover.merge discovery.prs model.items
+                    in
+                    ( { model
+                        | items = items
+                        , discovering = False
+                        , notice = discoveryNotice discovery
+                      }
+                    , Cmd.batch (storePrs (Persist.encodeItems items) :: badgeCmds items)
+                    )
 
         Tick now ->
             ( { model | now = now }, Cmd.none )
@@ -329,6 +359,27 @@ tokenMissing =
 repoInvalid : String
 repoInvalid =
     "Dépôt invalide (format attendu : owner/repo)."
+
+
+{-| Feedback after a discovery: how many PRs matched, plus a truncation note
+when a search hit its 100-result cap.
+-}
+discoveryNotice : Types.Discovery -> Maybe String
+discoveryNotice discovery =
+    let
+        count =
+            List.length discovery.prs
+
+        base =
+            String.fromInt count ++ " PR trouvée(s) par la découverte"
+    in
+    Just
+        (if discovery.truncated then
+            base ++ " — certaines non chargées (limite de 100 par recherche atteinte)"
+
+         else
+            base
+        )
 
 
 

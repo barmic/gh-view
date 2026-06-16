@@ -16,6 +16,7 @@ view model =
     div [ class "app" ]
         [ viewHeader model
         , viewError model.error
+        , viewNotice model.notice
         , viewList model
         ]
 
@@ -47,6 +48,13 @@ viewHeader model =
                 , disabled (anyFetching model)
                 ]
                 [ text (refreshLabel model) ]
+            , button
+                [ onClick FetchNewClicked
+                , class "btn"
+                , disabled model.discovering
+                , title "Découvrir les PR ouvertes des dépôts/comptes configurés et celles qui te sont assignées"
+                ]
+                [ text (discoverLabel model) ]
             , span [ class "refresh-status" ] [ text (refreshStatus model) ]
             ]
         ]
@@ -160,6 +168,16 @@ viewError maybeError =
     case maybeError of
         Just message ->
             div [ class "banner banner-error" ] [ text message ]
+
+        Nothing ->
+            text ""
+
+
+viewNotice : Maybe String -> Html Msg
+viewNotice maybeNotice =
+    case maybeNotice of
+        Just message ->
+            div [ class "banner banner-info" ] [ text message ]
 
         Nothing ->
             text ""
@@ -479,6 +497,15 @@ refreshLabel model =
 
     else
         "Rafraîchir les PR ouvertes"
+
+
+discoverLabel : Model -> String
+discoverLabel model =
+    if model.discovering then
+        "Récupération…"
+
+    else
+        "Récupérer les nouvelles PR"
 
 
 refreshStatus : Model -> String

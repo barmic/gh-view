@@ -1,7 +1,7 @@
 module Model exposing (Model, Msg(..))
 
 import Time
-import Types exposing (Item, PrData, PrId)
+import Types exposing (Discovery, Item, PrData, PrId)
 
 
 type alias Model =
@@ -13,8 +13,10 @@ type alias Model =
     , repoInput : String
     , authorInput : String
     , configOpen : Bool
+    , discovering : Bool
     , now : Time.Posix
     , error : Maybe String
+    , notice : Maybe String
     , highlight : Maybe PrId
     , lastRefresh : Maybe Time.Posix
     }
@@ -35,4 +37,6 @@ type Msg
     | AddAuthorClicked
     | RemoveAuthorClicked String
     | ToggleConfig
+    | FetchNewClicked
+    | GotDiscovered (Result String Discovery)
     | Tick Time.Posix

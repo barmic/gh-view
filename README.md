@@ -23,8 +23,29 @@ npm run build    # produit elm.js optimisé (à servir avec index.html + styles.
    ou un fine-grained token avec accès lecture aux PR des dépôts visés.
 2. Colle l'**URL d'une PR** (`https://github.com/owner/repo/pull/123`) et
    « Ajouter ».
-3. « Rafraîchir » recharge toutes les PR **ouvertes** (les mergées/fermées sont
-   figées et n'appellent plus l'API).
+3. « Rafraîchir » recharge toutes les PR **ouvertes** déjà suivies (les
+   mergées/fermées sont figées et n'appellent plus l'API).
+
+### Découverte automatique
+
+Dans **Configuration de la découverte** (bloc repliable), renseigne deux listes
+globales, persistées en `localStorage` :
+
+- des **dépôts** au format `owner/repo` ;
+- des **comptes** GitHub (login, avec ou sans `@` — le `@` est retiré au
+  stockage).
+
+« **Récupérer les nouvelles PR** » lance alors deux recherches GitHub :
+
+- les PR **ouvertes des dépôts configurés dont l'auteur est l'un des comptes
+  configurés** (déclenchée seulement si les deux listes sont non vides) ;
+- les PR **ouvertes qui te sont assignées**, partout (`assignee:@me`).
+
+Les résultats sont **fusionnés** dans la liste (dédupliqués par identifiant) :
+les nouvelles PR sont ajoutées, les PR déjà connues sont mises à jour au
+passage. Rien n'est jamais supprimé automatiquement ; retirer un dépôt ou un
+compte n'affecte que les découvertes suivantes. Chaque recherche est plafonnée à
+100 résultats : au-delà, une bannière signale que des PR n'ont pas été chargées.
 
 ## Données affichées
 

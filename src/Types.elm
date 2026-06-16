@@ -1,5 +1,6 @@
 module Types exposing
     ( Author
+    , Discovery
     , Item
     , Mergeable(..)
     , PrData
@@ -84,6 +85,15 @@ type alias Item =
     { id : PrId
     , data : Maybe PrData
     , fetching : Bool
+    }
+
+
+{-| Result of a discovery search: the matched open PRs and whether at least
+one search hit its result cap (so some matches were left out).
+-}
+type alias Discovery =
+    { prs : List PrData
+    , truncated : Bool
     }
 
 

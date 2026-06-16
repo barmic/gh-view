@@ -1,4 +1,4 @@
-module ViewTest exposing (configSuite, suite)
+module ViewTest exposing (configSuite, discoverSuite, suite)
 
 import Ci
 import Expect
@@ -21,8 +21,10 @@ baseModel =
     , repoInput = ""
     , authorInput = ""
     , configOpen = True
+    , discovering = False
     , now = Time.millisToPosix 0
     , error = Nothing
+    , notice = Nothing
     , highlight = Nothing
     , lastRefresh = Nothing
     }
@@ -71,6 +73,27 @@ configSuite =
                     |> Query.fromHtml
                     |> Query.findAll [ Selector.class "config-body" ]
                     |> Query.count (Expect.equal 0)
+        ]
+
+
+discoverSuite : Test
+discoverSuite =
+    describe "View discovery controls"
+        [ test "shows the discover button by default" <|
+            \_ ->
+                View.view baseModel
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.text "Récupérer les nouvelles PR" ]
+        , test "labels the button while discovering" <|
+            \_ ->
+                View.view { baseModel | discovering = True }
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.text "Récupération…" ]
+        , test "renders an info banner for a notice" <|
+            \_ ->
+                View.view { baseModel | notice = Just "3 PR trouvée(s)" }
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.class "banner-info", Selector.text "3 PR trouvée(s)" ]
         ]
 
 

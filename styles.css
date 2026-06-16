@@ -242,6 +242,12 @@ body {
   border: 1px solid var(--warn-fg);
 }
 
+.banner-info {
+  background: var(--neutral-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
 /* List */
 
 .empty {
