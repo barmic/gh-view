@@ -18,6 +18,7 @@ view model =
         , viewError model.error
         , viewNotice model.notice
         , viewList model
+        , viewConfig model
         ]
 
 
@@ -30,7 +31,6 @@ viewHeader model =
     header [ class "header" ]
         [ h1 [] [ text "gh-view" ]
         , viewTokenRow model
-        , viewConfig model
         , div [ class "add-row" ]
             [ input
                 [ type_ "text"

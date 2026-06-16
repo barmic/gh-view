@@ -94,6 +94,11 @@ discoverSuite =
                 View.view { baseModel | notice = Just "3 PR trouvée(s)" }
                     |> Query.fromHtml
                     |> Query.has [ Selector.class "banner-info", Selector.text "3 PR trouvée(s)" ]
+        , test "keeps the config toggle reachable in the full view" <|
+            \_ ->
+                View.view baseModel
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.text "Configuration de la découverte" ]
         ]
 
 

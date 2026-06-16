@@ -9337,55 +9337,22 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$View$viewError = function (maybeError) {
-	if (maybeError.$ === 'Just') {
-		var message = maybeError.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('banner banner-error')
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text(message)
-				]));
-	} else {
-		return $elm$html$Html$text('');
-	}
+var $author$project$Model$AddAuthorClicked = {$: 'AddAuthorClicked'};
+var $author$project$Model$AddRepoClicked = {$: 'AddRepoClicked'};
+var $author$project$Model$AuthorInputChanged = function (a) {
+	return {$: 'AuthorInputChanged', a: a};
 };
-var $author$project$Model$AddClicked = {$: 'AddClicked'};
-var $author$project$Model$FetchNewClicked = {$: 'FetchNewClicked'};
-var $author$project$Model$RefreshClicked = {$: 'RefreshClicked'};
-var $author$project$Model$UrlChanged = function (a) {
-	return {$: 'UrlChanged', a: a};
+var $author$project$Model$RemoveAuthorClicked = function (a) {
+	return {$: 'RemoveAuthorClicked', a: a};
 };
-var $author$project$View$anyFetching = function (model) {
-	return A2(
-		$elm$core$List$any,
-		function ($) {
-			return $.fetching;
-		},
-		model.items);
+var $author$project$Model$RemoveRepoClicked = function (a) {
+	return {$: 'RemoveRepoClicked', a: a};
 };
+var $author$project$Model$RepoInputChanged = function (a) {
+	return {$: 'RepoInputChanged', a: a};
+};
+var $author$project$Model$ToggleConfig = {$: 'ToggleConfig'};
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
-var $author$project$View$discoverLabel = function (model) {
-	return model.discovering ? 'Récupération…' : 'Récupérer les nouvelles PR';
-};
-var $elm$html$Html$h1 = _VirtualDom_node('h1');
-var $elm$html$Html$header = _VirtualDom_node('header');
-var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -9403,6 +9370,9 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$input = _VirtualDom_node('input');
 var $author$project$View$onEnter = function (msg) {
 	return A2(
 		$elm$html$Html$Events$on,
@@ -9442,42 +9412,10 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
-var $author$project$View$refreshLabel = function (model) {
-	return $author$project$View$anyFetching(model) ? 'Rafraîchissement…' : 'Rafraîchir les PR ouvertes';
-};
-var $author$project$Duration$relative = F2(
-	function (now, t) {
-		var secs = (($elm$time$Time$posixToMillis(now) - $elm$time$Time$posixToMillis(t)) / 1000) | 0;
-		return (secs < 0) ? 'à venir' : ((secs < 60) ? '<1min' : ((secs < 3600) ? ($elm$core$String$fromInt((secs / 60) | 0) + 'min') : ((secs < 86400) ? ($elm$core$String$fromInt((secs / 3600) | 0) + 'h') : ((secs < 604800) ? ($elm$core$String$fromInt((secs / 86400) | 0) + 'j') : ((secs < 2592000) ? ($elm$core$String$fromInt((secs / 604800) | 0) + 'sem') : ((secs < 31536000) ? ($elm$core$String$fromInt((secs / 2592000) | 0) + 'mois') : ($elm$core$String$fromInt((secs / 31536000) | 0) + 'an')))))));
-	});
-var $author$project$View$refreshStatus = function (model) {
-	var _v0 = model.lastRefresh;
-	if (_v0.$ === 'Just') {
-		var t = _v0.a;
-		return 'rafraîchi il y a ' + A2($author$project$Duration$relative, model.now, t);
-	} else {
-		return 'jamais';
-	}
-};
 var $elm$html$Html$span = _VirtualDom_node('span');
-var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-var $author$project$Model$AddAuthorClicked = {$: 'AddAuthorClicked'};
-var $author$project$Model$AddRepoClicked = {$: 'AddRepoClicked'};
-var $author$project$Model$AuthorInputChanged = function (a) {
-	return {$: 'AuthorInputChanged', a: a};
-};
-var $author$project$Model$RemoveAuthorClicked = function (a) {
-	return {$: 'RemoveAuthorClicked', a: a};
-};
-var $author$project$Model$RemoveRepoClicked = function (a) {
-	return {$: 'RemoveRepoClicked', a: a};
-};
-var $author$project$Model$RepoInputChanged = function (a) {
-	return {$: 'RepoInputChanged', a: a};
-};
-var $author$project$Model$ToggleConfig = {$: 'ToggleConfig'};
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $author$project$View$viewChip = F2(
 	function (onRemoveMsg, item) {
 		return A2(
@@ -9604,6 +9542,68 @@ var $author$project$View$viewConfig = function (model) {
 						]))
 				]) : _List_Nil));
 };
+var $author$project$View$viewError = function (maybeError) {
+	if (maybeError.$ === 'Just') {
+		var message = maybeError.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('banner banner-error')
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(message)
+				]));
+	} else {
+		return $elm$html$Html$text('');
+	}
+};
+var $author$project$Model$AddClicked = {$: 'AddClicked'};
+var $author$project$Model$FetchNewClicked = {$: 'FetchNewClicked'};
+var $author$project$Model$RefreshClicked = {$: 'RefreshClicked'};
+var $author$project$Model$UrlChanged = function (a) {
+	return {$: 'UrlChanged', a: a};
+};
+var $author$project$View$anyFetching = function (model) {
+	return A2(
+		$elm$core$List$any,
+		function ($) {
+			return $.fetching;
+		},
+		model.items);
+};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
+var $author$project$View$discoverLabel = function (model) {
+	return model.discovering ? 'Récupération…' : 'Récupérer les nouvelles PR';
+};
+var $elm$html$Html$h1 = _VirtualDom_node('h1');
+var $elm$html$Html$header = _VirtualDom_node('header');
+var $author$project$View$refreshLabel = function (model) {
+	return $author$project$View$anyFetching(model) ? 'Rafraîchissement…' : 'Rafraîchir les PR ouvertes';
+};
+var $author$project$Duration$relative = F2(
+	function (now, t) {
+		var secs = (($elm$time$Time$posixToMillis(now) - $elm$time$Time$posixToMillis(t)) / 1000) | 0;
+		return (secs < 0) ? 'à venir' : ((secs < 60) ? '<1min' : ((secs < 3600) ? ($elm$core$String$fromInt((secs / 60) | 0) + 'min') : ((secs < 86400) ? ($elm$core$String$fromInt((secs / 3600) | 0) + 'h') : ((secs < 604800) ? ($elm$core$String$fromInt((secs / 86400) | 0) + 'j') : ((secs < 2592000) ? ($elm$core$String$fromInt((secs / 604800) | 0) + 'sem') : ((secs < 31536000) ? ($elm$core$String$fromInt((secs / 2592000) | 0) + 'mois') : ($elm$core$String$fromInt((secs / 31536000) | 0) + 'an')))))));
+	});
+var $author$project$View$refreshStatus = function (model) {
+	var _v0 = model.lastRefresh;
+	if (_v0.$ === 'Just') {
+		var t = _v0.a;
+		return 'rafraîchi il y a ' + A2($author$project$Duration$relative, model.now, t);
+	} else {
+		return 'jamais';
+	}
+};
 var $author$project$Model$ForgetToken = {$: 'ForgetToken'};
 var $author$project$Model$TokenChanged = function (a) {
 	return {$: 'TokenChanged', a: a};
@@ -9670,7 +9670,6 @@ var $author$project$View$viewHeader = function (model) {
 						$elm$html$Html$text('gh-view')
 					])),
 				$author$project$View$viewTokenRow(model),
-				$author$project$View$viewConfig(model),
 				A2(
 				$elm$html$Html$div,
 				_List_fromArray(
@@ -10392,7 +10391,8 @@ var $author$project$View$view = function (model) {
 				$author$project$View$viewHeader(model),
 				$author$project$View$viewError(model.error),
 				$author$project$View$viewNotice(model.notice),
-				$author$project$View$viewList(model)
+				$author$project$View$viewList(model),
+				$author$project$View$viewConfig(model)
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
