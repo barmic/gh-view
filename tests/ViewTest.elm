@@ -1,13 +1,31 @@
-module ViewTest exposing (suite)
+module ViewTest exposing (configSuite, suite)
 
 import Ci
 import Expect
+import Model exposing (Model)
 import Test exposing (Test, describe, test)
 import Test.Html.Query as Query
 import Test.Html.Selector as Selector
 import Time
 import Types exposing (Mergeable(..), PrData, PrState(..), ReviewDecision(..))
 import View
+
+
+baseModel : Model
+baseModel =
+    { token = ""
+    , urlInput = ""
+    , items = []
+    , repos = []
+    , authors = []
+    , repoInput = ""
+    , authorInput = ""
+    , configOpen = True
+    , now = Time.millisToPosix 0
+    , error = Nothing
+    , highlight = Nothing
+    , lastRefresh = Nothing
+    }
 
 
 basePr : PrData
@@ -31,6 +49,29 @@ basePr =
 withGha : Ci.CiState -> PrData -> PrData
 withGha state pr =
     { pr | ci = { gha = { state = state, url = Nothing }, circle = { state = Ci.Unknown, url = Nothing } } }
+
+
+configSuite : Test
+configSuite =
+    describe "View.viewConfig"
+        [ test "renders a chip for each configured repo" <|
+            \_ ->
+                View.viewConfig { baseModel | repos = [ "o/r1", "o/r2" ] }
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.class "chip" ]
+                    |> Query.count (Expect.equal 2)
+        , test "renders the author login as a chip" <|
+            \_ ->
+                View.viewConfig { baseModel | authors = [ "octocat" ] }
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.class "chip", Selector.text "octocat" ]
+        , test "hides the config body when collapsed" <|
+            \_ ->
+                View.viewConfig { baseModel | configOpen = False, repos = [ "o/r" ] }
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.class "config-body" ]
+                    |> Query.count (Expect.equal 0)
+        ]
 
 
 suite : Test

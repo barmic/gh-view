@@ -1,4 +1,4 @@
-module View exposing (view, viewBadges)
+module View exposing (view, viewBadges, viewConfig)
 
 import Ci
 import Duration
@@ -29,6 +29,7 @@ viewHeader model =
     header [ class "header" ]
         [ h1 [] [ text "gh-view" ]
         , viewTokenRow model
+        , viewConfig model
         , div [ class "add-row" ]
             [ input
                 [ type_ "text"
@@ -75,6 +76,68 @@ viewTokenRow model =
                 [ text "Oublier" ]
             ]
         )
+
+
+{-| Collapsible discovery configuration: the global lists of watched repos
+(`owner/repo`) and authors (logins). Each list has a text input + "Ajouter"
+and renders its entries as removable chips.
+-}
+viewConfig : Model -> Html Msg
+viewConfig model =
+    div [ class "config" ]
+        (button
+            [ onClick ToggleConfig, class "btn btn-ghost config-toggle" ]
+            [ text
+                ((if model.configOpen then
+                    "▾ "
+
+                  else
+                    "▸ "
+                 )
+                    ++ "Configuration de la découverte"
+                )
+            ]
+            :: (if model.configOpen then
+                    [ div [ class "config-body" ]
+                        [ viewConfigGroup "Dépôts" "owner/repo" model.repoInput RepoInputChanged AddRepoClicked model.repos RemoveRepoClicked
+                        , viewConfigGroup "Comptes" "login GitHub (avec ou sans @)" model.authorInput AuthorInputChanged AddAuthorClicked model.authors RemoveAuthorClicked
+                        ]
+                    ]
+
+                else
+                    []
+               )
+        )
+
+
+viewConfigGroup : String -> String -> String -> (String -> Msg) -> Msg -> List String -> (String -> Msg) -> Html Msg
+viewConfigGroup label ph inputValue onInputMsg onAddMsg items onRemoveMsg =
+    div [ class "config-group" ]
+        [ span [ class "config-label" ] [ text label ]
+        , div [ class "config-row" ]
+            [ input
+                [ type_ "text"
+                , placeholder ph
+                , value inputValue
+                , onInput onInputMsg
+                , onEnter onAddMsg
+                , class "input config-input"
+                ]
+                []
+            , button [ onClick onAddMsg, class "btn btn-primary" ] [ text "Ajouter" ]
+            ]
+        , div [ class "chips" ] (List.map (viewChip onRemoveMsg) items)
+        ]
+
+
+viewChip : (String -> Msg) -> String -> Html Msg
+viewChip onRemoveMsg item =
+    span [ class "chip" ]
+        [ text item
+        , button
+            [ onClick (onRemoveMsg item), class "chip-remove", title "Retirer" ]
+            [ text "✕" ]
+        ]
 
 
 onEnter : Msg -> Attribute Msg

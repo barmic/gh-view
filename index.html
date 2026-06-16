@@ -16,6 +16,8 @@
 
       const TOKEN_KEY = "gh-view:token";
       const PRS_KEY = "gh-view:prs";
+      const REPOS_KEY = "gh-view:repos";
+      const AUTHORS_KEY = "gh-view:authors";
 
       function readJson(key, fallback) {
         try {
@@ -31,6 +33,8 @@
       const flags = {
         token: localStorage.getItem(TOKEN_KEY) || "",
         prs: readJson(PRS_KEY, []),
+        repos: readJson(REPOS_KEY, []),
+        authors: readJson(AUTHORS_KEY, []),
         now: Date.now(),
       };
 
@@ -49,6 +53,14 @@
 
       app.ports.storePrs.subscribe(function (prs) {
         localStorage.setItem(PRS_KEY, JSON.stringify(prs));
+      });
+
+      app.ports.storeRepos.subscribe(function (repos) {
+        localStorage.setItem(REPOS_KEY, JSON.stringify(repos));
+      });
+
+      app.ports.storeAuthors.subscribe(function (authors) {
+        localStorage.setItem(AUTHORS_KEY, JSON.stringify(authors));
       });
 
       app.ports.setFavicon.subscribe(function (href) {

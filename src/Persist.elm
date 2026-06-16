@@ -16,6 +16,8 @@ import Types exposing (Item, PrData)
 type alias Flags =
     { token : String
     , items : List Item
+    , repos : List String
+    , authors : List String
     , now : Time.Posix
     }
 
@@ -29,6 +31,8 @@ decodeFlags value =
             []
             value
             |> List.filterMap identity
+    , repos = decodeOr (Decode.field "repos" (Decode.list Decode.string)) [] value
+    , authors = decodeOr (Decode.field "authors" (Decode.list Decode.string)) [] value
     , now = Time.millisToPosix (decodeOr (Decode.field "now" Decode.int) 0 value)
     }
 

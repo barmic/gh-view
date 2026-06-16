@@ -4,6 +4,7 @@ port module Main exposing (main)
 -}
 
 import Browser
+import Config
 import Favicon
 import GitHub
 import Json.Decode as Decode
@@ -24,6 +25,12 @@ port storeToken : String -> Cmd msg
 
 
 port storePrs : Encode.Value -> Cmd msg
+
+
+port storeRepos : List String -> Cmd msg
+
+
+port storeAuthors : List String -> Cmd msg
 
 
 
@@ -72,6 +79,11 @@ init flagsValue =
             { token = flags.token
             , urlInput = ""
             , items = flags.items
+            , repos = flags.repos
+            , authors = flags.authors
+            , repoInput = ""
+            , authorInput = ""
+            , configOpen = List.isEmpty flags.repos && List.isEmpty flags.authors
             , now = flags.now
             , error = Nothing
             , highlight = Nothing
@@ -151,6 +163,64 @@ update msg model =
                     ( { model | items = items }
                     , Cmd.batch (storePrs (Persist.encodeItems items) :: badgeCmds items)
                     )
+
+        RepoInputChanged input ->
+            ( { model | repoInput = input, error = Nothing }, Cmd.none )
+
+        AddRepoClicked ->
+            case Config.parseRepo model.repoInput of
+                Nothing ->
+                    if String.isEmpty (String.trim model.repoInput) then
+                        ( model, Cmd.none )
+
+                    else
+                        ( { model | error = Just repoInvalid }, Cmd.none )
+
+                Just slug ->
+                    let
+                        repos =
+                            Config.addItem slug model.repos
+                    in
+                    ( { model | repos = repos, repoInput = "", error = Nothing }
+                    , storeRepos repos
+                    )
+
+        RemoveRepoClicked slug ->
+            let
+                repos =
+                    Config.removeItem slug model.repos
+            in
+            ( { model | repos = repos }, storeRepos repos )
+
+        AuthorInputChanged input ->
+            ( { model | authorInput = input, error = Nothing }, Cmd.none )
+
+        AddAuthorClicked ->
+            let
+                login =
+                    Config.normalizeAuthor model.authorInput
+            in
+            if String.isEmpty login then
+                ( model, Cmd.none )
+
+            else
+                let
+                    authors =
+                        Config.addItem login model.authors
+                in
+                ( { model | authors = authors, authorInput = "", error = Nothing }
+                , storeAuthors authors
+                )
+
+        RemoveAuthorClicked login ->
+            let
+                authors =
+                    Config.removeItem login model.authors
+            in
+            ( { model | authors = authors }, storeAuthors authors )
+
+        ToggleConfig ->
+            ( { model | configOpen = not model.configOpen }, Cmd.none )
 
         Tick now ->
             ( { model | now = now }, Cmd.none )
@@ -254,6 +324,11 @@ loadWarning model =
 tokenMissing : String
 tokenMissing =
     "Renseigne ton token GitHub pour charger les PR."
+
+
+repoInvalid : String
+repoInvalid =
+    "Dépôt invalide (format attendu : owner/repo)."
 
 
 

@@ -146,6 +146,88 @@ body {
   background: transparent;
 }
 
+/* Discovery configuration */
+
+.config {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.config-toggle {
+  align-self: flex-start;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.config-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.config-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.config-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.config-input {
+  max-width: 320px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px 3px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  background: var(--neutral-bg);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.chip-remove {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 50%;
+}
+
+.chip-remove:hover {
+  color: var(--warn-fg);
+  background: var(--warn-bg);
+}
+
 /* Banner */
 
 .banner {
