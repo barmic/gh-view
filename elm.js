@@ -8811,7 +8811,7 @@ var $author$project$Discover$authorQuery = F2(
 				' ',
 				A2(
 					$elm$core$List$cons,
-					'is:open is:pr',
+					'is:open is:pr -is:draft',
 					_Utils_ap(
 						A2(
 							$elm$core$List$map,
@@ -8920,7 +8920,7 @@ var $author$project$GitHub$decodeDiscovery = function (body) {
 			'Réponse inattendue : ' + $elm$json$Json$Decode$errorToString(err));
 	}
 };
-var $author$project$Discover$assignedQuery = 'is:open is:pr assignee:@me';
+var $author$project$Discover$assignedQuery = 'is:open is:pr -is:draft assignee:@me';
 var $author$project$GitHub$searchField = F2(
 	function (name, variable) {
 		return name + (': search(query:' + (variable + (',type:ISSUE,first:100){issueCount pageInfo{hasNextPage} nodes{__typename ... on PullRequest{' + ($author$project$GitHub$prFields + '}}}'))));

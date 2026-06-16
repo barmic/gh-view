@@ -41,6 +41,9 @@ globales, persistées en `localStorage` :
   configurés** (déclenchée seulement si les deux listes sont non vides) ;
 - les PR **ouvertes qui te sont assignées**, partout (`assignee:@me`).
 
+Les **drafts sont exclus** des deux recherches (`-is:draft`). Une PR draft peut
+toujours être suivie en l'ajoutant manuellement par son URL.
+
 Les résultats sont **fusionnés** dans la liste (dédupliqués par identifiant) :
 les nouvelles PR sont ajoutées, les PR déjà connues sont mises à jour au
 passage. Rien n'est jamais supprimé automatiquement ; retirer un dépôt ou un

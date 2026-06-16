@@ -9,16 +9,18 @@ import Types exposing (Item, PrData)
 
 
 {-| The search that always runs: open PRs assigned to the authenticated user,
-anywhere. `@me` is resolved server-side, so no login is needed.
+anywhere. `@me` is resolved server-side, so no login is needed. Drafts are
+excluded (`-is:draft`): they are generally not actionable.
 -}
 assignedQuery : String
 assignedQuery =
-    "is:open is:pr assignee:@me"
+    "is:open is:pr -is:draft assignee:@me"
 
 
 {-| The author search: open PRs in the configured repos whose author is one of
-the configured logins. Returns `Nothing` (skip the search) unless both lists
-are non-empty, since "PRs of my projects by configured authors" needs both.
+the configured logins. Drafts are excluded (`-is:draft`). Returns `Nothing`
+(skip the search) unless both lists are non-empty, since "PRs of my projects by
+configured authors" needs both.
 -}
 authorQuery : List String -> List String -> Maybe String
 authorQuery repos authors =
@@ -28,7 +30,7 @@ authorQuery repos authors =
     else
         Just
             (String.join " "
-                ("is:open is:pr"
+                ("is:open is:pr -is:draft"
                     :: List.map (\r -> "repo:" ++ r) repos
                     ++ List.map (\a -> "author:" ++ a) authors
                 )

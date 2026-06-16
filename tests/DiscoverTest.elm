@@ -39,10 +39,14 @@ suite =
                 \_ -> Discover.authorQuery [] [ "alice" ] |> Expect.equal Nothing
             , test "is Nothing when no authors are configured" <|
                 \_ -> Discover.authorQuery [ "o/r" ] [] |> Expect.equal Nothing
-            , test "combines repos and authors into a search query" <|
+            , test "combines repos and authors and excludes drafts" <|
                 \_ ->
                     Discover.authorQuery [ "o/r1", "o/r2" ] [ "alice", "bob" ]
-                        |> Expect.equal (Just "is:open is:pr repo:o/r1 repo:o/r2 author:alice author:bob")
+                        |> Expect.equal (Just "is:open is:pr -is:draft repo:o/r1 repo:o/r2 author:alice author:bob")
+            ]
+        , describe "assignedQuery"
+            [ test "excludes drafts" <|
+                \_ -> Discover.assignedQuery |> Expect.equal "is:open is:pr -is:draft assignee:@me"
             ]
         , describe "merge"
             [ test "appends a discovered PR not yet in the list" <|
