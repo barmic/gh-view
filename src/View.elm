@@ -1,6 +1,7 @@
 module View exposing (view, viewBadges, viewConfig)
 
 import Ci
+import Discover
 import Duration
 import Html exposing (Attribute, Html, a, button, div, h1, header, img, input, span, text)
 import Html.Attributes exposing (alt, class, classList, disabled, href, placeholder, src, target, title, type_, value)
@@ -109,6 +110,8 @@ viewConfig model =
                     [ div [ class "config-body" ]
                         [ viewConfigGroup "Dépôts" "owner/repo" model.repoInput RepoInputChanged AddRepoClicked model.repos RemoveRepoClicked
                         , viewConfigGroup "Comptes" "login GitHub (avec ou sans @)" model.authorInput AuthorInputChanged AddAuthorClicked model.authors RemoveAuthorClicked
+                        , div [ class "config-hint" ]
+                            [ text ("Découverte limitée aux PR actives dans les " ++ String.fromInt Discover.windowDays ++ " derniers jours.") ]
                         ]
                     ]
 

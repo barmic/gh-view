@@ -38,8 +38,14 @@ globales, persistées en `localStorage` :
 « **Récupérer les nouvelles PR** » lance alors deux recherches GitHub :
 
 - les PR **ouvertes des dépôts configurés dont l'auteur est l'un des comptes
-  configurés** (déclenchée seulement si les deux listes sont non vides) ;
-- les PR **ouvertes qui te sont assignées**, partout (`assignee:@me`).
+  configurés** (déclenchée seulement si les deux listes sont non vides), limitée
+  aux PR **actives dans les 31 derniers jours** (`updated:>=`) ;
+- les PR **ouvertes qui te sont assignées**, partout (`assignee:@me`), **sans
+  limite de temps**.
+
+La limite des 31 jours ne s'applique qu'à la *découverte* de nouvelles PR par
+dépôts/comptes : une PR déjà suivie reste affichée et rafraîchie même si son
+activité dépasse cette fenêtre.
 
 Les **drafts sont exclus** des deux recherches (`-is:draft`). Une PR draft peut
 toujours être suivie en l'ajoutant manuellement par son URL.

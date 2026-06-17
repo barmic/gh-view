@@ -1,11 +1,21 @@
-module Discover exposing (assignedQuery, authorQuery, merge)
+module Discover exposing (assignedQuery, authorQuery, merge, windowDays)
 
 {-| Pure logic for PR discovery: building the GitHub search query strings and
 merging discovered PRs into the existing watch list. The HTTP/JSON plumbing
 lives in `GitHub`; everything here is unit-testable without a network.
 -}
 
+import Iso8601
+import Time
 import Types exposing (Item, PrData)
+
+
+{-| How far back the author/repo discovery search looks, based on each PR's
+last activity (`updated`). PRs assigned to the viewer are never time-limited.
+-}
+windowDays : Int
+windowDays =
+    31
 
 
 {-| The search that always runs: open PRs assigned to the authenticated user,
@@ -18,12 +28,13 @@ assignedQuery =
 
 
 {-| The author search: open PRs in the configured repos whose author is one of
-the configured logins. Drafts are excluded (`-is:draft`). Returns `Nothing`
-(skip the search) unless both lists are non-empty, since "PRs of my projects by
-configured authors" needs both.
+the configured logins, restricted to those active in the last `windowDays`
+(`updated:>=`). Drafts are excluded (`-is:draft`). Returns `Nothing` (skip the
+search) unless both lists are non-empty, since "PRs of my projects by configured
+authors" needs both.
 -}
-authorQuery : List String -> List String -> Maybe String
-authorQuery repos authors =
+authorQuery : Time.Posix -> List String -> List String -> Maybe String
+authorQuery now repos authors =
     if List.isEmpty repos || List.isEmpty authors then
         Nothing
 
@@ -33,8 +44,17 @@ authorQuery repos authors =
                 ("is:open is:pr -is:draft"
                     :: List.map (\r -> "repo:" ++ r) repos
                     ++ List.map (\a -> "author:" ++ a) authors
+                    ++ [ "updated:>=" ++ Iso8601.fromTime (windowStart now) ]
                 )
             )
+
+
+{-| The earliest activity date a discovered author PR may have: `now` minus the
+discovery window.
+-}
+windowStart : Time.Posix -> Time.Posix
+windowStart now =
+    Time.millisToPosix (Time.posixToMillis now - windowDays * 24 * 60 * 60 * 1000)
 
 
 {-| Fold discovered PRs into the current items: refresh the data of items

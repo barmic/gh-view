@@ -31,22 +31,31 @@ item owner repo number data =
     { id = { owner = owner, repo = repo, number = number }, data = data, fetching = False }
 
 
+{-| 2026-06-17T00:00:00Z. The 31-day window then starts at 2026-05-17T00:00:00Z.
+-}
+now : Time.Posix
+now =
+    Time.millisToPosix 1781654400000
+
+
 suite : Test
 suite =
     describe "Discover"
         [ describe "authorQuery"
             [ test "is Nothing when no repos are configured" <|
-                \_ -> Discover.authorQuery [] [ "alice" ] |> Expect.equal Nothing
+                \_ -> Discover.authorQuery now [] [ "alice" ] |> Expect.equal Nothing
             , test "is Nothing when no authors are configured" <|
-                \_ -> Discover.authorQuery [ "o/r" ] [] |> Expect.equal Nothing
+                \_ -> Discover.authorQuery now [ "o/r" ] [] |> Expect.equal Nothing
             , test "combines repos and authors and excludes drafts" <|
                 \_ ->
-                    Discover.authorQuery [ "o/r1", "o/r2" ] [ "alice", "bob" ]
-                        |> Expect.equal (Just "is:open is:pr -is:draft repo:o/r1 repo:o/r2 author:alice author:bob")
+                    Discover.authorQuery now [ "o/r1", "o/r2" ] [ "alice", "bob" ]
+                        |> Expect.equal (Just "is:open is:pr -is:draft repo:o/r1 repo:o/r2 author:alice author:bob updated:>=2026-05-17T00:00:00.000Z")
             ]
         , describe "assignedQuery"
             [ test "excludes drafts" <|
                 \_ -> Discover.assignedQuery |> Expect.equal "is:open is:pr -is:draft assignee:@me"
+            , test "is not limited in time (no updated qualifier)" <|
+                \_ -> Discover.assignedQuery |> String.contains "updated:" |> Expect.equal False
             ]
         , describe "merge"
             [ test "appends a discovered PR not yet in the list" <|

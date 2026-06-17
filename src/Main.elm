@@ -231,7 +231,7 @@ update msg model =
 
             else
                 ( { model | discovering = True, error = Nothing, notice = Nothing }
-                , GitHub.discover model.token GotDiscovered { repos = model.repos, authors = model.authors }
+                , GitHub.discover model.token GotDiscovered { repos = model.repos, authors = model.authors, now = model.now }
                 )
 
         GotDiscovered result ->

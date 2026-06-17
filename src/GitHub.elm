@@ -16,6 +16,7 @@ import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import PrUrl
+import Time
 import Types exposing (Discovery, PrData, PrId)
 
 
@@ -95,13 +96,13 @@ unless both lists are non-empty) and one for PRs assigned to the viewer. Both
 run as aliased searches in a single request; the result is merged + deduped by
 the caller.
 -}
-discover : String -> (Result String Discovery -> msg) -> { repos : List String, authors : List String } -> Cmd msg
+discover : String -> (Result String Discovery -> msg) -> { repos : List String, authors : List String, now : Time.Posix } -> Cmd msg
 discover token toMsg config =
     Http.request
         { method = "POST"
         , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
         , url = endpoint
-        , body = Http.jsonBody (encodeSearchRequest (Discover.authorQuery config.repos config.authors))
+        , body = Http.jsonBody (encodeSearchRequest (Discover.authorQuery config.now config.repos config.authors))
         , expect = Http.expectStringResponse toMsg (interpret decodeDiscovery)
         , timeout = Just 20000
         , tracker = Nothing
