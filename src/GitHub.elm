@@ -34,6 +34,7 @@ prFields =
     title
     url
     state
+    isDraft
     mergeable
     reviewDecision
     createdAt

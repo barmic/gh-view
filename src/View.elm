@@ -230,6 +230,16 @@ updatedKey item =
             9007199254740991
 
 
+isDraft : Item -> Bool
+isDraft item =
+    case item.data of
+        Just d ->
+            d.state == StDraft
+
+        Nothing ->
+            False
+
+
 viewItem : Model -> Item -> Html Msg
 viewItem model item =
     let
@@ -237,6 +247,7 @@ viewItem model item =
             classList
                 [ ( "card", True )
                 , ( "card-highlight", model.highlight == Just item.id )
+                , ( "card-draft", isDraft item )
                 ]
     in
     case item.data of
@@ -367,6 +378,9 @@ stateBadge state =
         StOpen ->
             span [ class "badge badge-open" ] [ text "Open" ]
 
+        StDraft ->
+            span [ class "badge badge-draft" ] [ text "Draft" ]
+
         StMerged ->
             span [ class "badge badge-merged" ] [ text "Merged" ]
 
@@ -412,14 +426,15 @@ mergeableBadge m =
             span [ class "badge badge-neutral" ] [ text "Mergeable ?" ]
 
 
-{-| CI badges (GitHub Actions, then CircleCI). Only for open PRs — a finished
-PR's CI is irrelevant and not persisted. A provider with no checks (`Unknown`)
-contributes nothing, so an open PR without any CI yields an empty list and the
-CI row collapses.
+{-| CI badges (GitHub Actions, then CircleCI). Only for live PRs (open or
+draft) — a finished PR's CI is irrelevant and not persisted, while a draft
+still runs CI worth surfacing. A provider with no checks (`Unknown`)
+contributes nothing, so a PR without any CI yields an empty list and the CI
+row collapses.
 -}
 ciBadges : PrData -> List (Html Msg)
 ciBadges d =
-    if d.state == StOpen then
+    if d.state == StOpen || d.state == StDraft then
         List.filterMap identity
             [ ciBadge "GHA" d.ci.gha, ciBadge "CircleCI" d.ci.circle ]
 

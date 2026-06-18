@@ -299,6 +299,12 @@ body {
   outline-offset: 1px;
 }
 
+/* A draft PR is greyed out to read as "not ready" at a glance, while staying
+   light enough (0.65, not 0.5) to keep its CI badges legible. */
+.card-draft {
+  opacity: 0.65;
+}
+
 .card-main {
   grid-area: main;
   min-width: 0;
@@ -445,6 +451,11 @@ body {
 .badge-open {
   background: var(--ok-bg);
   color: var(--ok-fg);
+}
+
+.badge-draft {
+  background: var(--neutral-bg);
+  color: var(--neutral-fg);
 }
 
 .badge-merged {

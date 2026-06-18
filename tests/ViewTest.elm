@@ -1,4 +1,4 @@
-module ViewTest exposing (configSuite, discoverSuite, suite)
+module ViewTest exposing (configSuite, discoverSuite, draftSuite, suite)
 
 import Ci
 import Expect
@@ -7,7 +7,7 @@ import Test exposing (Test, describe, test)
 import Test.Html.Query as Query
 import Test.Html.Selector as Selector
 import Time
-import Types exposing (Mergeable(..), PrData, PrState(..), ReviewDecision(..))
+import Types exposing (Item, Mergeable(..), PrData, PrState(..), ReviewDecision(..))
 import View
 
 
@@ -51,6 +51,11 @@ basePr =
 withGha : Ci.CiState -> PrData -> PrData
 withGha state pr =
     { pr | ci = { gha = { state = state, url = Nothing }, circle = { state = Ci.Unknown, url = Nothing } } }
+
+
+loadedItem : PrData -> Item
+loadedItem pr =
+    { id = pr.id, data = Just pr, fetching = False }
 
 
 configSuite : Test
@@ -99,6 +104,29 @@ discoverSuite =
                 View.view baseModel
                     |> Query.fromHtml
                     |> Query.has [ Selector.text "Configuration de la découverte" ]
+        ]
+
+
+draftSuite : Test
+draftSuite =
+    describe "View draft styling"
+        [ test "a draft card carries the card-draft class" <|
+            \_ ->
+                View.view { baseModel | items = [ loadedItem { basePr | state = StDraft } ] }
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.class "card-draft" ]
+        , test "a draft renders a Draft badge" <|
+            \_ ->
+                View.view { baseModel | items = [ loadedItem { basePr | state = StDraft } ] }
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.class "badge-draft", Selector.text "Draft" ]
+        , test "a draft still shows its CI row" <|
+            \_ ->
+                { basePr | state = StDraft }
+                    |> withGha Ci.Succeed
+                    |> View.viewBadges
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.class "badge-row-ci" ]
         ]
 
 

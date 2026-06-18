@@ -3,6 +3,7 @@ module GitHubTest exposing (suite)
 import Expect
 import GitHub
 import Test exposing (Test, describe, test)
+import Types exposing (PrState(..))
 
 
 prNode : String -> Int -> String
@@ -25,6 +26,42 @@ prNode repo number =
     """
         |> String.replace "__REPO__" repo
         |> String.replace "__N__" (String.fromInt number)
+
+
+prNodeState : String -> Bool -> String
+prNodeState state isDraft =
+    """
+    { "__typename": "PullRequest"
+    , "title": "A PR"
+    , "url": "https://github.com/o/r/pull/1"
+    , "state": "__STATE__"
+    , "isDraft": __DRAFT__
+    , "mergeable": "MERGEABLE"
+    , "reviewDecision": null
+    , "createdAt": "2024-01-01T00:00:00Z"
+    , "updatedAt": "2024-01-02T00:00:00Z"
+    , "headRefName": "feature"
+    , "baseRefName": "main"
+    , "author": { "login": "alice", "avatarUrl": "" }
+    , "reviewThreads": { "nodes": [] }
+    , "commits": { "nodes": [] }
+    }
+    """
+        |> String.replace "__STATE__" state
+        |> String.replace "__DRAFT__"
+            (if isDraft then
+                "true"
+
+             else
+                "false"
+            )
+
+
+decodeStates : String -> Bool -> Result String (List PrState)
+decodeStates state isDraft =
+    ("""{ "data": { "assigned": """ ++ section False [ prNodeState state isDraft ] ++ "}}")
+        |> GitHub.decodeDiscovery
+        |> Result.map (.prs >> List.map .state)
 
 
 section : Bool -> List String -> String
@@ -83,4 +120,16 @@ suite =
                 """{ "errors": [ { "message": "Something went wrong" } ] }"""
                     |> GitHub.decodeDiscovery
                     |> Expect.equal (Err "Something went wrong")
+        , test "an open draft decodes to StDraft" <|
+            \_ ->
+                decodeStates "OPEN" True
+                    |> Expect.equal (Ok [ StDraft ])
+        , test "a non-draft open PR stays StOpen" <|
+            \_ ->
+                decodeStates "OPEN" False
+                    |> Expect.equal (Ok [ StOpen ])
+        , test "a closed draft is StClosed (terminal state wins)" <|
+            \_ ->
+                decodeStates "CLOSED" True
+                    |> Expect.equal (Ok [ StClosed ])
         ]

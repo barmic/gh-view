@@ -48,7 +48,9 @@ dépôts/comptes : une PR déjà suivie reste affichée et rafraîchie même si 
 activité dépasse cette fenêtre.
 
 Les **drafts sont exclus** des deux recherches (`-is:draft`). Une PR draft peut
-toujours être suivie en l'ajoutant manuellement par son URL.
+toujours être suivie en l'ajoutant manuellement par son URL : elle s'affiche
+alors avec un badge **« Draft »** et une carte **grisée** pour la repérer d'un
+coup d'œil (sa CI reste visible).
 
 Les résultats sont **fusionnés** dans la liste (dédupliqués par identifiant) :
 les nouvelles PR sont ajoutées, les PR déjà connues sont mises à jour au

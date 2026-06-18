@@ -45,6 +45,7 @@ type Mergeable
 
 type PrState
     = StOpen
+    | StDraft
     | StClosed
     | StMerged
 

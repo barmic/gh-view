@@ -187,27 +187,45 @@ mergeableToString m =
             "UNKNOWN"
 
 
+{-| GitHub exposes draft-ness as a separate `isDraft` boolean alongside the
+`state` enum, so a draft PR is `OPEN` + `isDraft:true`. We collapse the two
+into `StDraft`, but only for *open* drafts: terminal states win (a closed or
+merged draft is just closed or merged). `isDraft` is absent from persisted
+snapshots — finished PRs are never drafts — so it defaults to `False`.
+-}
 stateField : Decoder PrState
 stateField =
-    Decode.field "state" Decode.string
-        |> Decode.map
-            (\s ->
-                case s of
-                    "MERGED" ->
-                        StMerged
+    Decode.map2
+        (\s isDraft ->
+            case s of
+                "MERGED" ->
+                    StMerged
 
-                    "CLOSED" ->
-                        StClosed
+                "CLOSED" ->
+                    StClosed
 
-                    _ ->
+                _ ->
+                    if isDraft then
+                        StDraft
+
+                    else
                         StOpen
-            )
+        )
+        (Decode.field "state" Decode.string)
+        (Decode.maybe (Decode.field "isDraft" Decode.bool)
+            |> Decode.map (Maybe.withDefault False)
+        )
 
 
 stateToString : PrState -> String
 stateToString s =
     case s of
         StOpen ->
+            "OPEN"
+
+        StDraft ->
+            -- StDraft is only ever open, and open PRs persist id-only, so this
+            -- branch is unreachable in practice; "OPEN" is the safe round-trip.
             "OPEN"
 
         StClosed ->
