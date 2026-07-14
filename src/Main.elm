@@ -34,6 +34,9 @@ port storeRepos : List String -> Cmd msg
 port storeAuthors : List String -> Cmd msg
 
 
+port copyText : String -> Cmd msg
+
+
 
 -- PORTS (out): reflect the open-PR count into the favicon and tab title
 
@@ -132,6 +135,11 @@ update msg model =
             in
             ( { model | items = items }
             , Cmd.batch (storePrs (Persist.encodeItems items) :: badgeCmds items)
+            )
+
+        CopyBranch branch ->
+            ( { model | notice = Just ("Branche « " ++ branch ++ " » copiée ✓"), error = Nothing }
+            , copyText branch
             )
 
         RefreshClicked ->

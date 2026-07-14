@@ -357,6 +357,22 @@ body {
   color: var(--muted);
 }
 
+.btn-copy {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0 2px;
+  margin-left: 4px;
+  vertical-align: baseline;
+}
+
+.btn-copy:hover {
+  color: var(--neutral-fg);
+}
+
 .author {
   display: inline-flex;
   align-items: center;

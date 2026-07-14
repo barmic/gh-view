@@ -76,6 +76,33 @@
       app.ports.setTitle.subscribe(function (titleText) {
         document.title = titleText;
       });
+
+      app.ports.copyText.subscribe(function (branch) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(branch).catch(function () {
+            fallbackCopy(branch);
+          });
+        } else {
+          fallbackCopy(branch);
+        }
+      });
+
+      // Clipboard API needs a secure context (https/localhost); fall back to a
+      // throwaway textarea + execCommand when it is unavailable.
+      function fallbackCopy(text) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        document.body.appendChild(area);
+        area.select();
+        try {
+          document.execCommand("copy");
+        } catch (e) {
+          /* nothing else we can do */
+        }
+        document.body.removeChild(area);
+      }
     </script>
   </body>
 </html>

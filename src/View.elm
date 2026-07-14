@@ -315,6 +315,7 @@ viewBranch : PrData -> Html Msg
 viewBranch d =
     span [ class "branch" ]
         (text d.headRef
+            :: copyBranchButton d.headRef
             :: (if d.baseRef == "main" || d.baseRef == "master" then
                     []
 
@@ -322,6 +323,16 @@ viewBranch d =
                     [ span [ class "branch-arrow" ] [ text " → " ], text d.baseRef ]
                )
         )
+
+
+copyBranchButton : String -> Html Msg
+copyBranchButton branch =
+    button
+        [ onClick (CopyBranch branch)
+        , class "btn-copy"
+        , title "Copier le nom de la branche"
+        ]
+        [ text "⧉" ]
 
 
 viewAuthor : Author -> Html Msg

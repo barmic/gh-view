@@ -28,6 +28,7 @@ type Msg
     | UrlChanged String
     | AddClicked
     | RemoveClicked PrId
+    | CopyBranch String
     | RefreshClicked
     | GotPr PrId (Result String PrData)
     | RepoInputChanged String
